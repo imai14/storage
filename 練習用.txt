@@ -1,0 +1,61 @@
+function CheckMail_() { 
+//受信日時指定
+var nowdate = new Date() ;//現在時刻を取得
+var unixTime = nowdate.getTime();//UNIX TIMEに変換
+var now = Math.floor(unixTime/1000); //ミリ秒を秒に変換
+var term = now - 86400; //現在時刻から24時間（86400秒）前まで検索
+var termStr = term.toString(); //検索期間を文字列に変換
+
+
+//Gmailから特定条件のスレッドを検索しメールを取り出す
+var srchCondition = 'from:()'; //検索条件指定　//Gmailで検索窓に入れる内容
+var strTerms = srchCondition; //検索条件：termの期間に、srchConditionの条件に合致するメール
+var myThreads = GmailApp.search(strTerms,0,1); //24時間以内の最新のメール1件を取り出す
+var myMsgs = GmailApp.getMessagesForThreads(myThreads); //スレッドからメールを取得する　//二次元配列
+console.log(myMsgs.length,'myMsgslength');
+console.log(myMsgs,'mymsgs');
+//メールから日時、送信元、件名、内容を取り出す
+console.log(myMsgs[0].length,'mymsgs.length');
+//メール返信があるか確認。１ならない
+
+var date = myMsgs[0][0].getDate();
+//[0][0]で指定なのは、上記の条件で１件しか２次配列に取得していないため、左[0]固定。右は1以上にすると返信したメールから取得するため[0]固定
+console.log(date,'date')
+var from = myMsgs[0][0].getFrom();
+console.log(from,'from')
+var subject = myMsgs[0][0].getSubject();
+console.log(subject,'subject')
+var body = myMsgs[0][0].getPlainBody();
+Logger.log(myMsgs[0][0].getBody()); //各スレッドの1番目のメールのbodyをログ出力
+
+if(subject.includes("要対応")){
+console.log("対応が必要")
+}else if(subject.includes("要確認")){
+console.log("チェックが必要")
+}else{
+console.log("検知なし")
+}
+}
+
+
+function test() {//forEachの動作確認
+// 検索条件に該当するスレッド一覧を取得
+var threads = GmailApp.search('from:() subject:()',0,2); //検索条件指定　//Gmailで検索窓に入れる内容と送信元
+
+// スレッドを一つずつ取り出す
+threads.forEach(function(thread) {
+
+// スレッド内のメール一覧を取得
+var messages = thread.getMessages();
+
+// メールを一つずつ取り出す
+messages.forEach(function(message) {
+
+// メール本文を取得
+var plainBody = message.getPlainBody();
+
+// メール本文が取得できているかログに出力して確認
+Logger.log(plainBody);
+});
+});
+}
